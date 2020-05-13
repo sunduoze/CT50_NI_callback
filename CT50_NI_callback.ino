@@ -19,7 +19,7 @@ void setup() {
   Serial.begin(115200);
   Wire.begin();///< i2c init NULL: master addr: slave
   printf_begin();
-  printf("\r\n\r\ntest fw version A01 @20200511\r\n");
+  printf("\r\n\r\ntest fw version A02 @20200513\r\n");
   printf("ct50 ni callback process:%x !\r\n", ct50_ni_ver);
   
   if (max17201_wt_ct50_ni_data() != true){
@@ -102,6 +102,23 @@ bool max17201_verify_n_device_name4_data(const uint16_t data)
   }
 }
 
+bool max17201_verify_n_device_name4_data_and_fix(const uint16_t data)
+{
+  uint16_t r_data_temp = 0;
+  // max17201_full_reset();
+  printf("version idn :0x%4x\r\n", data);
+  i2c_dev_r_word(max_17201_0x16_addr, 0xDF, &r_data_temp);
+
+  if (r_data_temp == data){
+      printf("verify ram data ok:0x%4x\r\n", r_data_temp);
+      return true;
+  }
+  else{
+     printf("ERROR verify ram data false:0x%4x\r\n", r_data_temp);
+     return false;   
+  }
+}
+
 bool max17201_wt_ct50_ni_data(void)
 { ////////////////////////////////////wt to RAM
 	///< TO BE WRITE
@@ -125,7 +142,7 @@ bool max17201_wt_ct50_ni_data(void)
   i2c_dev_w_word(max_17201_0x16_addr, 0xDF, ct50_ni_ver);
   delay(10);
 
-  if (max17201_verify_n_device_name4_data(ct50_ni_ver) == true){
+  if (max17201_verify_n_device_name4_data_and_fix(ct50_ni_ver) == true){
   	printf("version info ram changed ok !\r\n");
   }
 
